@@ -1,0 +1,74 @@
+# Ignore Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Ignore environment and virtual environment directories
+env/
+venv/
+.venv/
+ENV/
+.ENV/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore VSCode settings and workspace files
+.vscode/
+*.code-workspace
+
+# Ignore Python egg files
+*.egg-info/
+.eggs/
+
+# Ignore local IDE/editor settings
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore logs and debugging files
+*.log
+logs/
+
+# Ignore temporary files
+*.tmp
+*.temp
+~$*
+
+# Ignore pytest cache
+.pytest_cache/
+
+# Ignore coverage files
+htmlcov/
+.coverage
+.coverage.*
+
+# Ignore compiled libraries
+*.so
+*.dylib
+*.dll
+
+# Ignore virtual environment manager files
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Ignore build directories
+build/
+dist/
+__pycache__/
+
+# Ignore custom cache or temporary directories if any
+.cache/
+.mypy_cache/
+
+# Ignore temporary Python runner files from VSCode
+tempCodeRunnerFile.py
