@@ -13,6 +13,7 @@ The project will involve experimenting with various machine learning models and 
 
 ## Structure
 The project will contain the following components:
+```bash
 Dataset/
 ├── Evaluation/
 ├── News/
@@ -34,6 +35,7 @@ saved_models/
 Utils/
 └── WriteEvaluation.py
 Web/
+```
 
 ## Copyright
 All rights reserved. This project is copyrighted by:
