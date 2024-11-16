@@ -24,11 +24,11 @@ logging.basicConfig(
 
 if __name__ == "__main__":
 
-    #################### Setup Area###################################
-    model_type = "Ridge"
+    #################### Setup Area ###################################
+    model_type = "SVR"
     config = DatasetConfig(
-        file_path=r"Dataset\Stock\IHSG_Stock_Clean.csv",
-        file_path_sentiment=r"Dataset\News\News_Kompas.csv",  # Uncomment if you want to use sentiment
+        file_path=r"Dataset/Stock/IHSG_Stock_Clean.csv",
+        file_path_sentiment=r"Dataset/News/News_Kompas.csv",  # Uncomment if you want to use sentiment
         split_ratio=0.8,
         n_in=10,
         sentiment_scenario=1,
@@ -40,9 +40,9 @@ if __name__ == "__main__":
     use_returns = False
     return_type = "log"  # return_type bisa "absolute" atau "relative" atau "log"
     use_custom_params = (
-        False  # Jika ingin menggunakan parameter custom jangan lupa uncomment
+        True  # Jika ingin menggunakan parameter custom jangan lupa uncomment
     )
-    # params =  {'C': 300, 'epsilon': 0.01, 'gamma': 'auto', 'kernel': 'rbf','degree': 3} #custom params
+    params =  {'C': 10, 'epsilon': 0.01, 'gamma': 'scale', 'kernel': 'linear'} #custom params
 
     ####################################################
 
