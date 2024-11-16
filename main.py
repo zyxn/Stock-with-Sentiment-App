@@ -1,8 +1,9 @@
 import logging
 import os
 from datetime import datetime
-from Process.Dataproc import Dataproc, DatasetConfig
+
 from Models.Factory import ModelFactory
+from Process.Dataproc import Dataproc, DatasetConfig
 from Utils.WriteEvaluation import WriteEvaluation
 
 # Define the directory for logs
@@ -26,18 +27,18 @@ if __name__ == "__main__":
     model_type = "Xgboost"
     config = DatasetConfig(
         file_path=r"Dataset\Stock\IHSG_Stock_Clean.csv",
-        # file_path_sentiment=r"Dataset\News\News_Kompas.csv", #Uncomment if you want to use sentiment
+        file_path_sentiment=r"Dataset\News\News_Kompas.csv", #Uncomment if you want to use sentiment
         split_ratio=0.8,
         n_in=10,
         drop_columns=True,
         drop_columns_list=["Change%", "Volume"],  # Kolom yang akan di-drop
-        start_date="2014-01-03",
+        start_date="2022-01-03",
         end_date="2024-08-06",
     )
     dataproc = Dataproc(config)
 
-    # params = {"kernel": "linear", "C": 1.0} #custom params
-    model = ModelFactory.use_model(model_type, dataproc)  # , params untuk parameter model
+    params = {'n_estimator': 3000, 'max_depth': 7, 'min_child_weight': 2, 'learning_rate': 0.48,"random_state": 42} #custom params
+    model = ModelFactory.use_model(model_type, dataproc,params)  # , params untuk parameter model
     model.create_model(use_returns=True, return_type="log") # return_type bisa "absolute" atau "relative" atau "log"
     model.show_summary()
     model.plot_prediction()
