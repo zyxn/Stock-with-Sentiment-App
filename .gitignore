@@ -72,3 +72,6 @@ __pycache__/
 
 # Ignore temporary Python runner files from VSCode
 tempCodeRunnerFile.py
+
+evaluation.csv
+
