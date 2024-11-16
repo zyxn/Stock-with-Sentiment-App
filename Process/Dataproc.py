@@ -17,6 +17,7 @@ class DatasetConfig:
     split_ratio: float = 0.8
     n_in: int = 10
     n_out: int = 1
+    sentiment_scenario: int = 1
     drop_columns: bool = True
     drop_columns_list: list = field(
         default_factory=lambda: ["Change%", "Volume"]
@@ -115,10 +116,12 @@ class Dataproc:
         return data
 
     def combine_sentiment_and_stock_data(self):
-        data_process = SentimentAnalysis(self.DATA_SENTIMENT, 1)
+        data_process = SentimentAnalysis(
+            self.DATA_SENTIMENT, self.config.sentiment_scenario
+        )
         combined_data = pd.merge(
             self.DATA,
-            data_process.proccessed_data,
+            data_process.processed_data,
             how="left",
             left_index=True,
             right_index=True,
@@ -136,7 +139,7 @@ class Dataproc:
             val_length,
         )
         return train_length, val_length
-    
+
     def _select_supervised_data(self) -> pd.DataFrame:
         if self.config.file_path_sentiment is None:
             return self._create_supervised_data()
@@ -171,9 +174,13 @@ class Dataproc:
             X_train = X_train.drop(["Open(t)", "Close(t)", "High(t)", "Low(t)"], axis=1)
             X_val = X_val.drop(["Open(t)", "Close(t)", "High(t)", "Low(t)"], axis=1)
         else:
-            X_train = X_train.drop(["Open(t)", "Close(t)", "High(t)", "Low(t)", "skor_sentimen(t)"], axis=1)
-            X_val = X_val.drop(["Open(t)", "Close(t)", "High(t)", "Low(t)", "skor_sentimen(t)"], axis=1)
-            
+            X_train = X_train.drop(
+                ["Open(t)", "Close(t)", "High(t)", "Low(t)", "skor_sentimen(t)"], axis=1
+            )
+            X_val = X_val.drop(
+                ["Open(t)", "Close(t)", "High(t)", "Low(t)", "skor_sentimen(t)"], axis=1
+            )
+
         logging.info(
             "Data split complete: X_train shape=%s, X_val shape=%s",
             X_train.shape,

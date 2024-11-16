@@ -146,6 +146,9 @@ class ModelLR:
             pickle.dump(self.model, f)
         logging.info("Model saved to %s", file_path)
 
+    def get_params(self):
+        return self.model.get_params()
+
 
 if __name__ == "__main__":
     config = DatasetConfig(file_path=r"Dataset\Stock\IHSG_Stock_Clean.csv")

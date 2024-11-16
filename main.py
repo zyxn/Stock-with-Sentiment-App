@@ -24,32 +24,80 @@ logging.basicConfig(
 )
 
 if __name__ == "__main__":
-    model_type = "Xgboost"
+
+    #################### Setup Area###################################
+    model_type = "Ridge"
     config = DatasetConfig(
         file_path=r"Dataset\Stock\IHSG_Stock_Clean.csv",
+<<<<<<< HEAD
         file_path_sentiment=r"Dataset\News\News_Kompas.csv", #Uncomment if you want to use sentiment
+=======
+        file_path_sentiment=r"Dataset\News\News_Kompas.csv",  # Uncomment if you want to use sentiment
+>>>>>>> 01858386d73ca285ef3352a8524de23b2f34cbe2
         split_ratio=0.8,
         n_in=10,
+        sentiment_scenario=1,
         drop_columns=True,
+<<<<<<< HEAD
         drop_columns_list=["Change%", "Volume"],  # Kolom yang akan di-drop
         start_date="2022-01-03",
         end_date="2024-08-06",
+=======
+        drop_columns_list=["Change%", "Volume"],  # Kolom yang akan di-drop dari dataset
+        start_date="2014-01-03",  # Minimum 2014-01-03
+        end_date="2024-08-06",  # Maximum 2024-08-06
+>>>>>>> 01858386d73ca285ef3352a8524de23b2f34cbe2
     )
+    use_returns = False
+    return_type = "log"  # return_type bisa "absolute" atau "relative" atau "log"
+    use_custom_params = (
+        False  # Jika ingin menggunakan parameter custom jangan lupa uncomment
+    )
+    # params =  {'C': 300, 'epsilon': 0.01, 'gamma': 'auto', 'kernel': 'rbf','degree': 3} #custom params
+
+    ####################################################
+
     dataproc = Dataproc(config)
 
+<<<<<<< HEAD
     params = {'n_estimator': 3000, 'max_depth': 7, 'min_child_weight': 2, 'learning_rate': 0.48,"random_state": 42} #custom params
     model = ModelFactory.use_model(model_type, dataproc,params)  # , params untuk parameter model
     model.create_model(use_returns=True, return_type="log") # return_type bisa "absolute" atau "relative" atau "log"
+=======
+    if use_custom_params:
+        model = ModelFactory.use_model(
+            model_type, dataproc, params
+        )  # , params untuk parameter model
+    else:
+        model = ModelFactory.use_model(
+            model_type, dataproc
+        )  # , params untuk parameter model
+    model.create_model(use_returns=use_returns, return_type=return_type)
+>>>>>>> 01858386d73ca285ef3352a8524de23b2f34cbe2
     model.show_summary()
     model.plot_prediction()
-    WriteEvaluation(model.evaluation, model_type)
 
+    # model.save_model() #Jika ingin menyimpan model
+    WriteEvaluation(
+        model.evaluation, model_type, model.get_params(), use_returns, return_type
+    )
+
+
+# Buat TA
+# 1. Skenario Sentiment Bisa Per Case
+# 2. Skenario lag Data
+# 3. Tune dan Tanpa tune Model
+# 4. Model Serupa
+# 5. Saham Dalam IHSG
 
 # TODO
-# load model -- Done
-# Show in Streamlit -- TBA
-# Add Sentiment Dataset -- Done
+# Bikin Scenario 1 - 3 Sentiment -- TBA
 # seperate Sentiment Model -- TBA
+# Making Unit Test -- TBA
+# load model -- TBA
+# Show in Streamlit -- Done
+# More Advance Write Evaluation for etl to csv  -- Done
+# Modular Sentiment Per Scenario -- Done
+# Add Sentiment Dataset -- Done
 # Combine Sentiment and Stock Data -- DONE
 # add function filter time data -- DONE
-# More Advance Write Evaluation for etl to csv and show in streamlit -- TBA

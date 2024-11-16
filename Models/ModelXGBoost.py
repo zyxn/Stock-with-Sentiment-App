@@ -147,3 +147,6 @@ class ModelXGBoost:
         with open(file_path, "wb") as f:
             pickle.dump(self.model, f)
         logging.info("Model saved to %s", file_path)
+
+    def get_params(self):
+        return self.model.get_params()
