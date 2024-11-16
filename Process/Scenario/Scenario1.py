@@ -9,9 +9,7 @@ class Scenario1:
         self.result = self.process()
 
     def process(self) -> pd.DataFrame:
-        df_avg_sentimen = (
-            self.news.groupby("tanggal")["skor_sentimen"].mean().reset_index()
-        )
-        df_avg_sentimen_clean = df_avg_sentimen.dropna(subset=["skor_sentimen"])
-        df_avg_sentimen_clean.set_index("tanggal", inplace=True)
+        df_avg_sentimen = self.news
+        df_avg_sentimen_clean = df_avg_sentimen.dropna(subset=["Sentiment_Score"])
+        # df_avg_sentimen_clean.set_index("tanggal", inplace=True)
         return df_avg_sentimen_clean

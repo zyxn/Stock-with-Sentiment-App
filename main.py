@@ -25,10 +25,10 @@ logging.basicConfig(
 if __name__ == "__main__":
 
     #################### Setup Area###################################
-    model_type = "Ridge"
+    model_type = "Xgboost"
     config = DatasetConfig(
         file_path=r"Dataset\Stock\IHSG_Stock_Clean.csv",
-        file_path_sentiment=r"Dataset\News\News_Kompas.csv",  # Uncomment if you want to use sentiment
+        file_path_sentiment=r"Dataset\News\Daily_Sentiment_Score.csv",  # Uncomment if you want to use sentiment
         split_ratio=0.8,
         n_in=10,
         sentiment_scenario=1,
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         start_date="2014-01-03",  # Minimum 2014-01-03
         end_date="2024-08-06",  # Maximum 2024-08-06
     )
-    use_returns = False
+    use_returns = True
     return_type = "log"  # return_type bisa "absolute" atau "relative" atau "log"
     use_custom_params = (
         False  # Jika ingin menggunakan parameter custom jangan lupa uncomment
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
 # Buat TA
 # 1. Skenario Sentiment Bisa Per Case
-# 2. Skenario lag Data
+# 2. Skenario lag Datafdfsd
 # 3. Tune dan Tanpa tune Model
 # 4. Model Serupa
 # 5. Saham Dalam IHSG

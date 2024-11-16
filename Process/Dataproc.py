@@ -91,9 +91,10 @@ class Dataproc:
             "Reading dataset sentiment from: %s", self.config.file_path_sentiment
         )
         data_sentiment = pd.read_csv(self.config.file_path_sentiment)
-        self._extract_date(data_sentiment)
-        data_sentiment = self._extract_news_json(data_sentiment)
+        # self._extract_date(data_sentiment)
+        # data_sentiment = self._extract_news_json(data_sentiment)
         data_sentiment.dropna(subset=["tanggal"], inplace=True)
+        data_sentiment["tanggal"] = pd.to_datetime(data_sentiment["tanggal"])
         data_sentiment.set_index("tanggal", inplace=True)
         return data_sentiment
 
@@ -117,6 +118,7 @@ class Dataproc:
         data_process = SentimentAnalysis(
             self.DATA_SENTIMENT, self.config.sentiment_scenario
         )
+
         combined_data = pd.merge(
             self.DATA,
             data_process.processed_data,
@@ -124,7 +126,7 @@ class Dataproc:
             left_index=True,
             right_index=True,
         )
-        combined_data["skor_sentimen"] = combined_data["skor_sentimen"].ffill()
+        combined_data["Sentiment_Score"] = combined_data["Sentiment_Score"].ffill()
         return combined_data
 
     def _calculate_split_lengths(self) -> Tuple[int, int]:
@@ -173,10 +175,12 @@ class Dataproc:
             X_val = X_val.drop(["Open(t)", "Close(t)", "High(t)", "Low(t)"], axis=1)
         else:
             X_train = X_train.drop(
-                ["Open(t)", "Close(t)", "High(t)", "Low(t)", "skor_sentimen(t)"], axis=1
+                ["Open(t)", "Close(t)", "High(t)", "Low(t)", "Sentiment_Score(t)"],
+                axis=1,
             )
             X_val = X_val.drop(
-                ["Open(t)", "Close(t)", "High(t)", "Low(t)", "skor_sentimen(t)"], axis=1
+                ["Open(t)", "Close(t)", "High(t)", "Low(t)", "Sentiment_Score(t)"],
+                axis=1,
             )
 
         logging.info(
