@@ -150,8 +150,36 @@ class Dataproc:
                 data_sup = self._create_supervised_data()
                 return self._sigma_score(data_sup)
 
+            elif self.config.sentiment_scenario == 3:
+                self.DATA = self.combine_sentiment_and_stock_data()
+                data_sup = self._create_supervised_data()
+                return self._scenario3(data_sup)
+
+            elif self.config.sentiment_scenario == 4:
+                self.DATA = self.combine_sentiment_and_stock_data()
+                data_sup = self._create_supervised_data()
+                return self._scenario4(data_sup)
+
             self.DATA = self.combine_sentiment_and_stock_data()
             return self._create_supervised_data()
+
+    def _scenario3(self, data_sup):
+        sentiment_columns = [
+            col
+            for col in data_sup.columns
+            if col.startswith("Sentiment_Score(t-") and col != "Sentiment_Score(t-1)"
+        ]
+        data_sup = data_sup.drop(columns=sentiment_columns)
+        return data_sup
+
+    def _scenario4(self, data_sup):
+        sentiment_columns = [
+            col for col in data_sup.columns if col.startswith("Sentiment_Score(t-")
+        ]
+        # Hitung sum dari kolom-kolom tersebut dan bagi dengan 2
+        data_sup["Sigma_Sentiment"] = data_sup[sentiment_columns].sum(axis=1)
+        data_sup = data_sup.drop(columns=sentiment_columns)
+        return data_sup
 
     def _sigma_score(self, data_sup):
         sentiment_columns = [

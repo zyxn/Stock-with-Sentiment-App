@@ -31,7 +31,7 @@ if __name__ == "__main__":
         file_path_sentiment=r"Dataset\News\Daily_Sentiment_Score.csv",  # Uncomment if you want to use sentiment
         split_ratio=0.8,
         n_in=10,
-        sentiment_scenario=2,  # 1 = Normal, 2 = {Sigma i=1 to n when Xi/2}
+        sentiment_scenario=1,  # 1 = Normal, 2 = {Sigma i=1 to n when Xi/2}
         drop_columns=True,
         drop_columns_list=["Change%", "Volume"],  # Kolom yang akan di-drop dari dataset
         start_date="2014-01-03",  # Minimum 2014-01-03
