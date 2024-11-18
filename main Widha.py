@@ -1,9 +1,9 @@
 import logging
 import os
 from datetime import datetime
-from Process.Dataproc import Dataproc, DatasetConfig
-from Models.Factory import ModelFactory
-from Utils.WriteEvaluation import WriteEvaluation
+from Process import Dataproc, DatasetConfig
+from Models import ModelFactory
+from Utils import WriteEvaluation
 
 # Define the directory for logs
 log_dir = "logs"
@@ -42,7 +42,12 @@ if __name__ == "__main__":
     use_custom_params = (
         True  # Jika ingin menggunakan parameter custom jangan lupa uncomment
     )
-    params =  {'C': 10, 'epsilon': 0.01, 'gamma': 'scale', 'kernel': 'linear'} #custom params
+    params = {
+        "C": 10,
+        "epsilon": 0.01,
+        "gamma": "scale",
+        "kernel": "linear",
+    }  # custom params
 
     ####################################################
 

@@ -144,8 +144,23 @@ class Dataproc:
         if self.config.file_path_sentiment is None:
             return self._create_supervised_data()
         else:
+            if self.config.sentiment_scenario == 2:
+                # Tambah scenario disini soalnya harus di supervised dulu terus edit split datanya huhuhu
+                self.DATA = self.combine_sentiment_and_stock_data()
+                data_sup = self._create_supervised_data()
+                return self._sigma_score(data_sup)
+
             self.DATA = self.combine_sentiment_and_stock_data()
             return self._create_supervised_data()
+
+    def _sigma_score(self, data_sup):
+        sentiment_columns = [
+            col for col in data_sup.columns if col.startswith("Sentiment_Score(t-")
+        ]
+        # Hitung sum dari kolom-kolom tersebut dan bagi dengan 2
+        data_sup["Sigma_Sentiment"] = data_sup[sentiment_columns].sum(axis=1) / 2
+        data_sup = data_sup.drop(columns=sentiment_columns)
+        return data_sup
 
     def _create_supervised_data(self) -> pd.DataFrame:
         logging.info("Creating supervised data")

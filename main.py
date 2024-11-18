@@ -1,9 +1,9 @@
 import logging
 import os
 from datetime import datetime
-from Process.Dataproc import Dataproc, DatasetConfig
-from Models.Factory import ModelFactory
-from Utils.WriteEvaluation import WriteEvaluation
+from Process import Dataproc, DatasetConfig
+from Models import ModelFactory
+from Utils import WriteEvaluation
 
 # Define the directory for logs
 log_dir = "logs"
@@ -24,31 +24,37 @@ logging.basicConfig(
 
 if __name__ == "__main__":
 
-    #################### Setup Area###################################
-    model_type = "Xgboost"
+    #################### Setup Area ###################################
+    model_type = "Ridge"  # Pastikan nama konsisten dengan di Factory : SVR, Xgboost, LSTM, Ridge,LR
     config = DatasetConfig(
         file_path=r"Dataset\Stock\IHSG_Stock_Clean.csv",
         file_path_sentiment=r"Dataset\News\Daily_Sentiment_Score.csv",  # Uncomment if you want to use sentiment
         split_ratio=0.8,
         n_in=10,
-        sentiment_scenario=1,
+        sentiment_scenario=2,  # 1 = Normal, 2 = {Sigma i=1 to n when Xi/2}
         drop_columns=True,
         drop_columns_list=["Change%", "Volume"],  # Kolom yang akan di-drop dari dataset
         start_date="2014-01-03",  # Minimum 2014-01-03
         end_date="2024-08-06",  # Maximum 2024-08-06
     )
-    use_returns = True
+    use_returns = False  # Jika False maka akan menggunakan Close
     return_type = "log"  # return_type bisa "absolute" atau "relative" atau "log"
     use_custom_params = (
-        False  # Jika ingin menggunakan parameter custom jangan lupa uncomment
+        False  # Jika ingin menggunakan parameter custom jangan lupa set to True
     )
-    # params =  {'C': 300, 'epsilon': 0.01, 'gamma': 'auto', 'kernel': 'rbf','degree': 3} #custom params
+    params = {
+        "C": 300,
+        "epsilon": 0.01,
+        "gamma": "auto",
+        "kernel": "rbf",
+        "degree": 3,
+    }  # custom params, sesuaikan sesuai parameter model yang dipakai
 
     ####################################################
 
     dataproc = Dataproc(config)
 
-    if use_custom_params:
+    if use_custom_params and params:
         model = ModelFactory.use_model(
             model_type, dataproc, params
         )  # , params untuk parameter model
@@ -68,14 +74,15 @@ if __name__ == "__main__":
 
 # Buat TA
 # 1. Skenario Sentiment Bisa Per Case
-# 2. Skenario lag Datafdfsd
+# 2. Skenario lag Data
 # 3. Tune dan Tanpa tune Model
 # 4. Model Serupa
 # 5. Saham Dalam IHSG
 
 # TODO
-# Bikin Scenario 1 - 3 Sentiment -- TBA
+# Bikin Scenario 1 - 3 Sentiment -- TBA -- Scenario 2 Done
 # seperate Sentiment Model -- TBA
+# Optuna Tuning -- TBA
 # Making Unit Test -- TBA
 # load model -- TBA
 # Show in Streamlit -- Done
