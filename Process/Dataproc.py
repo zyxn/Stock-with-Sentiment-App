@@ -93,9 +93,10 @@ class Dataproc:
             "Reading dataset sentiment from: %s", self.config.file_path_sentiment
         )
         data_sentiment = pd.read_csv(self.config.file_path_sentiment)
-        self._extract_date(data_sentiment)
-        data_sentiment = self._extract_news_json(data_sentiment)
+        # self._extract_date(data_sentiment)
+        # data_sentiment = self._extract_news_json(data_sentiment)
         data_sentiment.dropna(subset=["tanggal"], inplace=True)
+        data_sentiment["tanggal"] = pd.to_datetime(data_sentiment["tanggal"])
         data_sentiment.set_index("tanggal", inplace=True)
         return data_sentiment
 
@@ -119,6 +120,7 @@ class Dataproc:
         data_process = SentimentAnalysis(
             self.DATA_SENTIMENT, self.config.sentiment_scenario
         )
+
         combined_data = pd.merge(
             self.DATA,
             data_process.processed_data,
@@ -126,7 +128,7 @@ class Dataproc:
             left_index=True,
             right_index=True,
         )
-        combined_data["skor_sentimen"] = combined_data["skor_sentimen"].ffill()
+        combined_data["Sentiment_Score"] = combined_data["Sentiment_Score"].ffill()
         return combined_data
 
     def _calculate_split_lengths(self) -> Tuple[int, int]:
@@ -144,8 +146,67 @@ class Dataproc:
         if self.config.file_path_sentiment is None:
             return self._create_supervised_data()
         else:
+            if self.config.sentiment_scenario == 2:
+                # Tambah scenario disini soalnya harus di supervised dulu terus edit split datanya huhuhu
+                self.DATA = self.combine_sentiment_and_stock_data()
+                data_sup = self._create_supervised_data()
+                return self._sigma_score(data_sup)
+
+            elif self.config.sentiment_scenario == 3:
+                self.DATA = self.combine_sentiment_and_stock_data()
+                data_sup = self._create_supervised_data()
+                return self._scenario3(data_sup)
+
+            elif self.config.sentiment_scenario == 4:
+                self.DATA = self.combine_sentiment_and_stock_data()
+                data_sup = self._create_supervised_data()
+                return self._scenario4(data_sup)
+
+            elif self.config.sentiment_scenario == 5:
+                self.DATA = self.combine_sentiment_and_stock_data()
+                data_sup = self._create_supervised_data()
+                return self._scenario4(data_sup)
+
             self.DATA = self.combine_sentiment_and_stock_data()
             return self._create_supervised_data()
+
+    def _scenario3(self, data_sup):
+        sentiment_columns = [
+            col
+            for col in data_sup.columns
+            if col.startswith("Sentiment_Score(t-") and col != "Sentiment_Score(t-1)"
+        ]
+        data_sup = data_sup.drop(columns=sentiment_columns)
+        return data_sup
+
+    def _scenario4(self, data_sup):
+        sentiment_columns = [
+            col for col in data_sup.columns if col.startswith("Sentiment_Score(t-")
+        ]
+        # Hitung sum dari kolom-kolom tersebut dan bagi dengan 2
+        data_sup["Sigma_Sentiment"] = data_sup[sentiment_columns].sum(axis=1)
+        data_sup = data_sup.drop(columns=sentiment_columns)
+        return data_sup
+
+    def _scenario5(self, data_sup):
+        sentiment_columns = [
+            col for col in data_sup.columns if col.startswith("Sentiment_Score(t-")
+        ]
+        # Hitung sum dari kolom-kolom tersebut dan bagi dengan 2
+        data_sup["Sigma_Sentiment"] = data_sup[sentiment_columns].sum(axis=1) / np.exp(
+            np.arange(len(sentiment_columns))
+        )
+        data_sup = data_sup.drop(columns=sentiment_columns)
+        return data_sup
+
+    def _sigma_score(self, data_sup):
+        sentiment_columns = [
+            col for col in data_sup.columns if col.startswith("Sentiment_Score(t-")
+        ]
+        # Hitung sum dari kolom-kolom tersebut dan bagi dengan 2
+        data_sup["Sigma_Sentiment"] = data_sup[sentiment_columns].sum(axis=1) / 2
+        data_sup = data_sup.drop(columns=sentiment_columns)
+        return data_sup
 
     def _create_supervised_data(self) -> pd.DataFrame:
         logging.info("Creating supervised data")
@@ -175,10 +236,12 @@ class Dataproc:
             X_val = X_val.drop(["Open(t)", "Close(t)", "High(t)", "Low(t)"], axis=1)
         else:
             X_train = X_train.drop(
-                ["Open(t)", "Close(t)", "High(t)", "Low(t)", "skor_sentimen(t)"], axis=1
+                ["Open(t)", "Close(t)", "High(t)", "Low(t)", "Sentiment_Score(t)"],
+                axis=1,
             )
             X_val = X_val.drop(
-                ["Open(t)", "Close(t)", "High(t)", "Low(t)", "skor_sentimen(t)"], axis=1
+                ["Open(t)", "Close(t)", "High(t)", "Low(t)", "Sentiment_Score(t)"],
+                axis=1,
             )
 
         logging.info(
@@ -210,6 +273,101 @@ class Dataproc:
         self, X_train_scaled: pd.DataFrame, X_val_scaled: pd.DataFrame
     ) -> Tuple[np.ndarray, np.ndarray]:
         logging.info("Transposing scaled data")
+
+        if (
+            self.config.sentiment_scenario != 1
+            and self.config.file_path_sentiment is not None
+            and self.config.sentiment_scenario != 3
+        ):
+            sentiment_column = "Sigma_Sentiment"
+            features_columns = [
+                col for col in X_train_scaled.columns if col != sentiment_column
+            ]
+            timesteps = self.config.n_in
+            features = len(features_columns) // timesteps
+
+            X_train_time_series = [
+                X_train_scaled[features_columns]
+                .iloc[:, i * features : (i + 1) * features]
+                .values
+                for i in range(timesteps)
+            ]
+            X_val_time_series = [
+                X_val_scaled[features_columns]
+                .iloc[:, i * features : (i + 1) * features]
+                .values
+                for i in range(timesteps)
+            ]
+            sentiment_train = X_train_scaled[sentiment_column].values[
+                :, np.newaxis, np.newaxis
+            ]
+            sentiment_val = X_val_scaled[sentiment_column].values[
+                :, np.newaxis, np.newaxis
+            ]
+
+            # Gabungkan time-series dan sentiment score
+            X_train = np.array(X_train_time_series).transpose(
+                1, 0, 2
+            )  # (samples, timesteps, features)
+            X_val = np.array(X_val_time_series).transpose(1, 0, 2)
+
+            # Tambahkan sentiment score ke fitur terakhir
+            X_train = np.concatenate(
+                [X_train, np.repeat(sentiment_train, timesteps, axis=1)], axis=2
+            )
+            X_val = np.concatenate(
+                [X_val, np.repeat(sentiment_val, timesteps, axis=1)], axis=2
+            )
+
+            logging.info("Data transposition complete")
+            return X_train, X_val
+        elif (
+            self.config.sentiment_scenario == 3
+            and self.config.file_path_sentiment is not None
+        ):
+            sentiment_column = "Sentiment_Score(t-1)"
+            features_columns = [
+                col for col in X_train_scaled.columns if col != sentiment_column
+            ]
+            timesteps = self.config.n_in
+            features = len(features_columns) // timesteps
+
+            X_train_time_series = [
+                X_train_scaled[features_columns]
+                .iloc[:, i * features : (i + 1) * features]
+                .values
+                for i in range(timesteps)
+            ]
+            X_val_time_series = [
+                X_val_scaled[features_columns]
+                .iloc[:, i * features : (i + 1) * features]
+                .values
+                for i in range(timesteps)
+            ]
+            sentiment_train = X_train_scaled[sentiment_column].values[
+                :, np.newaxis, np.newaxis
+            ]
+            sentiment_val = X_val_scaled[sentiment_column].values[
+                :, np.newaxis, np.newaxis
+            ]
+
+            # Gabungkan time-series dan sentiment score
+            X_train = np.array(X_train_time_series).transpose(
+                1, 0, 2
+            )  # (samples, timesteps, features)
+            X_val = np.array(X_val_time_series).transpose(1, 0, 2)
+
+            # Tambahkan sentiment score ke fitur terakhir
+            X_train = np.concatenate(
+                [X_train, np.repeat(sentiment_train, timesteps, axis=1)], axis=2
+            )
+            X_val = np.concatenate(
+                [X_val, np.repeat(sentiment_val, timesteps, axis=1)], axis=2
+            )
+
+            logging.info("Data transposition complete")
+            return X_train, X_val
+
         timesteps, features = (
             self.config.n_in,
             len(X_train_scaled.columns) // self.config.n_in,
@@ -234,13 +392,21 @@ class Dataproc:
         returns = {
             "y_train": ReturnsData(
                 np.concatenate([[bbfil], np.diff(y_train)]),
-                np.concatenate([[bbfil], np.diff(y_train) / y_train[:-1]]),
-                np.concatenate([[bbfil], np.diff(np.log(y_train))]),
+                np.concatenate(
+                    [[bbfil], np.diff(y_train) / y_train[:-1] * 100]
+                ),  # Multiply by 100 for percentage
+                np.concatenate(
+                    [[bbfil], np.diff(np.log(y_train)) * 100]
+                ),  # Multiply by 100 for percentage
             ),
             "y_val": ReturnsData(
                 np.concatenate([[bbfil], np.diff(y_val)]),
-                np.concatenate([[bbfil], np.diff(y_val) / y_val[:-1]]),
-                np.concatenate([[bbfil], np.diff(np.log(y_val))]),
+                np.concatenate(
+                    [[bbfil], np.diff(y_val) / y_val[:-1] * 100]
+                ),  # Multiply by 100 for percentage
+                np.concatenate(
+                    [[bbfil], np.diff(np.log(y_val)) * 100]
+                ),  # Multiply by 100 for percentage
             ),
         }
         logging.info("Returns calculation complete")

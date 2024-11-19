@@ -16,4 +16,11 @@ date_time,rmse,mse,r2,mae,mape
 =======
 date_time,rmse,mse,r2,mae,mape,extra_params,returns,return_type
 2024-11-15 01:12:56,49.49171718511808,2449.430069931712,0.9412090046183078,38.341017012890454,0.0054868978860280965,"{""copy_X"": true, ""fit_intercept"": true, ""n_jobs"": null, ""positive"": false}",False,
+<<<<<<< HEAD
 >>>>>>> 01858386d73ca285ef3352a8524de23b2f34cbe2
+=======
+2024-11-15 13:49:25,49.44888711459173,2445.1924368716354,-0.07505424087343426,38.342778548822096,167933549793806.53,"{""copy_X"": true, ""fit_intercept"": true, ""n_jobs"": null, ""positive"": false}",True,absolute
+2024-11-15 13:49:38,49.51216758052013,2451.4547385215087,0.9411604087089274,38.441929356684184,0.005502326420126805,"{""copy_X"": true, ""fit_intercept"": true, ""n_jobs"": null, ""positive"": false}",False,
+2024-11-15 15:34:24,49.87351112366031,2487.3671118018688,0.945970417463215,37.935754926312995,0.005417369594863255,"{""copy_X"": true, ""fit_intercept"": true, ""n_jobs"": null, ""positive"": false}",False,
+2024-11-16 13:12:47,49.548208156266156,2455.02493149668,0.941074717265317,38.42182840269934,0.005499340288884186,"{""copy_X"": true, ""fit_intercept"": true, ""n_jobs"": null, ""positive"": false}",False,
+>>>>>>> eaeec1e6ee40903c3ebdb82e4e8e89ae1d788b55
