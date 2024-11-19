@@ -18,6 +18,11 @@ import pickle
 import matplotlib.pyplot as plt
 from typing import Dict
 import logging
+from keras.losses import Huber
+import tensorflow as tf
+from keras import backend as K
+from keras.optimizers import Adam
+from sklearn.preprocessing import PolynomialFeatures
 
 
 @dataclass
@@ -55,10 +60,14 @@ class ModelLSTM:
             )
         )
         model_lstm.add(Dropout(0.1))
-        model_lstm.add(LSTM(128, activation="relu", return_sequences=False))
-        model_lstm.add(Dense(128))
+        model_lstm.add(LSTM(32, activation="relu", return_sequences=False))
+        model_lstm.add(Dense(32, activation="relu"))
         model_lstm.add(Dense(1))
-        model_lstm.compile(optimizer="adam", loss="mse", metrics=["mse"])
+        model_lstm.compile(
+            optimizer="adam",
+            loss="mse",
+            metrics=["mae"],
+        )
         return model_lstm
 
     def create_model(self, use_returns: bool = False, return_type: str = ""):
@@ -82,12 +91,12 @@ class ModelLSTM:
             )
 
         early_stopping = EarlyStopping(
-            monitor="val_loss", patience=20, verbose=1, restore_best_weights=True
+            monitor="val_loss", patience=3, verbose=1, restore_best_weights=True
         )
         history = self.model.fit(
             self.X_train,
             self.y_train,
-            epochs=200,
+            epochs=100,
             batch_size=32,
             validation_data=(self.X_val, self.y_val),
             callbacks=[early_stopping],
@@ -120,6 +129,7 @@ class ModelLSTM:
 
         self.y_train = return_data_mapping[return_type]
         self.y_val = return_data_mapping_val[return_type]
+
         logging.info("Return data set successfully for training and validation")
 
     def predict(self, new_data: pd.DataFrame) -> np.ndarray:

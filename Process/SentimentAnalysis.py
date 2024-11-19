@@ -20,6 +20,8 @@ class SentimentAnalysis:
             return Scenario2(self.news).result
         if flag == 4:
             return Scenario2(self.news).result
+        if flag == 5:
+            return Scenario2(self.news).result
         # Add additional scenarios here as needed
 
     def get_sentiment(self):

@@ -25,10 +25,10 @@ logging.basicConfig(
 if __name__ == "__main__":
 
     #################### Setup Area ###################################
-    model_type = "Ridge"  # Pastikan nama konsisten dengan di Factory : SVR, Xgboost, LSTM, Ridge,LR
+    model_type = "LSTM"  # Pastikan nama konsisten dengan di Factory : SVR, Xgboost, LSTM, Ridge,LR
     config = DatasetConfig(
         file_path=r"Dataset\Stock\IHSG_Stock_Clean.csv",
-        file_path_sentiment=r"Dataset\News\Daily_Sentiment_Score.csv",  # Uncomment if you want to use sentiment
+        # file_path_sentiment=r"Dataset\News\Daily_Sentiment_Score.csv",  # Uncomment if you want to use sentiment
         split_ratio=0.8,
         n_in=10,
         sentiment_scenario=1,  # 1 = Normal, 2 = {Sigma i=1 to n when Xi/2}
@@ -37,17 +37,16 @@ if __name__ == "__main__":
         start_date="2014-01-03",  # Minimum 2014-01-03
         end_date="2024-08-06",  # Maximum 2024-08-06
     )
-    use_returns = False  # Jika False maka akan menggunakan Close
-    return_type = "log"  # return_type bisa "absolute" atau "relative" atau "log"
+    use_returns = True  # Jika False maka akan menggunakan Close
+    return_type = "relative"  # return_type bisa "absolute" atau "relative" atau "log"
     use_custom_params = (
         False  # Jika ingin menggunakan parameter custom jangan lupa set to True
     )
     params = {
-        "C": 300,
+        "C": 10,
         "epsilon": 0.01,
-        "gamma": "auto",
-        "kernel": "rbf",
-        "degree": 3,
+        "gamma": "scale",
+        "kernel": "linear",
     }  # custom params, sesuaikan sesuai parameter model yang dipakai
 
     ####################################################
@@ -62,10 +61,13 @@ if __name__ == "__main__":
         model = ModelFactory.use_model(
             model_type, dataproc
         )  # , params untuk parameter model
+
+    print(model.X_train.shape)
     model.create_model(use_returns=use_returns, return_type=return_type)
     model.show_summary()
     model.plot_prediction()
 
+    print(model.y_val[:10])
     # model.save_model() #Jika ingin menyimpan model
     WriteEvaluation(
         model.evaluation, model_type, model.get_params(), use_returns, return_type
